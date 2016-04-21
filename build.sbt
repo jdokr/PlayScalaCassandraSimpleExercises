@@ -6,8 +6,11 @@ lazy val `playscalacassandrasimpleexercises` = (project in file(".")).enablePlug
 
 scalaVersion := "2.11.7"
 
-libraryDependencies ++= Seq( jdbc , cache , ws   , specs2 % Test, "com.datastax.cassandra"  % "cassandra-driver-core" % "3.0.0")
+libraryDependencies ++= Seq( jdbc , cache , ws   , specs2 % Test, "com.datastax.cassandra"  % "cassandra-driver-core" % "3.0.0",
+  "com.streamsend" % "pillar" % "1.0.2")
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
 
-resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"  
+resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
+
+routesGenerator := InjectedRoutesGenerator
