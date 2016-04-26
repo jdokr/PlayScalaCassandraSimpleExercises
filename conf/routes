@@ -6,12 +6,17 @@
 GET     /admin                      @controllers.Login.index
 GET     /                           @controllers.Application.index
 
+
+
 POST    /                           @controllers.Application.createSong
+POST    /delete/:id                 @controllers.Application.deleteSong(id : java.util.UUID)
+POST    /edit/                      @controllers.Application.updateSong(id : java.util.UUID)
+
 POST    /admin/add                  @controllers.Login.addUser()
 
 GET     /:id                        @controllers.Application.songById(id)
 
-GET     /admin/delete/:id            @controllers.Login.deleteUser(id : Long)
+GET     /admin/delete/:id           @controllers.Login.deleteUser(id : Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

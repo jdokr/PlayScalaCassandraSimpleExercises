@@ -34,39 +34,53 @@ package controllers
 import java.util.UUID
 
 import com.google.inject.Inject
-import models.SongsRepository
-import play.api.libs.json.{JsError, Json}
-import play.api.mvc._
+import models.{Song, SongForm, SongsRepository}
+import play.api.libs.json.{Json}
+import play.api.mvc.{AnyContent, _}
 
-import scala.concurrent.Future
+
 
 class Application @Inject() (songsRepo: SongsRepository) extends Controller {
 
   import models.JsonFormats._
   import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-  def index = Action.async {
+  def index: Action[AnyContent]= Action.async {
 
     songsRepo.getAll.map(songs => Ok(views.html.index(songs)))
 
-
   }
 
-  def createSong = Action.async(parse.json) { implicit request =>
+  def createSong = Action { implicit request =>
     // Json Format defined in models.JsonFormats.songDataReads
-    request.body.validate[(String, String, String)].map {
-      case (title, album, artist) => {
-        songsRepo.insert(title, album, artist).map( id =>
-          Created.withHeaders("Location" -> routes.Application.songById(id.toString).absoluteURL(false))
-        )
-      }
-    }.recoverTotal {
-      e => Future.successful(BadRequest("Detected error:" + JsError.toJson(e)))
-    }
-  }
+    SongForm.form.bindFromRequest.fold(
+      errorForm => Ok(views.html.index(Seq.empty[Song])),
+      data => {
+        val newSong = songsRepo.insert(data.title,data.album, data.artist)
+        Redirect(routes.Application.index())
 
+      })
+
+  }
   def songById(id: String) = Action.async {
     songsRepo.getById(UUID.fromString(id)).map(song => Ok(Json.toJson(song)))
+  }
+
+  def deleteSong (Id: UUID) = Action { implicit request =>
+    songsRepo.delete(Id)
+    Redirect(routes.Application.index())
+
+  }
+
+  def updateSong (Id: UUID) = Action { implicit request =>
+    SongForm.form.bindFromRequest.fold(
+    errorForm => Ok(views.html.index(Seq.empty[Song])),
+    data => {
+      val newSong = songsRepo.update(Id, data.title,data.album, data.artist)
+      Redirect(routes.Application.index())
+
+    })
+
   }
 
 }

@@ -1,35 +1,26 @@
 @(songs : Seq[models.Song])
-@main("Welcome to Play") {
-    <!DOCTYPE html>
-    <html>
-        <div class="panel panel-default" >
-
-            <div class="panel-heading">Registered Users</div>
-
-            <table class='table table-hover' >
-                <tr>
-                    <th>Album</th>
-                    <th>Artist</th>
-                    <th>ID</th>
-                    <th>Title</th>
-
-                </tr>
-                @for(user <- songs){
-                    <tr>
-                        <td>@user.album</td>
-                        <td>@user.artist</td>
-                        <td>@user.id</td>
-                        <td>@user.title</td>
 
 
-                    </tr>
-                }
+@main("Welcome to my First app") {
+<!DOCTYPE html>
+<html>
+
+    <div><!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary btn-md pull-right" tabindex="7" data-toggle="modal" data-target="#myModal">
+            Add Song
+        </button>
+    </div>
+
+    @views.html.CRUD.listSongs(songs)
 
 
-            </table>
 
-        </div>
-        <script src="/public/javascripts/bootstrap.min.js"></script>
-    </html>
+    <!-- Crud and confirmation imports -->
+    @views.html.CRUD.deleteConfirmationModal()
+    @views.html.CRUD.addSongModal()
+    @views.html.CRUD.editSong()
+
+
+</html>
 }
 

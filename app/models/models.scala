@@ -5,6 +5,8 @@ import java.util.UUID
 import com.datastax.driver.core.{BoundStatement, Row}
 import com.datastax.driver.core.utils.UUIDs
 import com.google.inject.Inject
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -13,6 +15,8 @@ import scala.collection.convert.WrapAsScala
 import scala.concurrent.{ExecutionContext, Future}
 
 case class Song(id: UUID, title: String, album: String, artist: String)
+
+case class SongFormData(title: String, album: String, artist: String)
 
 class SongsRepository @Inject() (client: SimpleClient) {
 
@@ -38,6 +42,16 @@ class SongsRepository @Inject() (client: SimpleClient) {
   def insert(title: String, album: String, artist: String)(implicit ctxt: ExecutionContext): Future[UUID] = {
     val stmt = new BoundStatement(client.session.prepare("INSERT INTO simplex.songs (id, title, album, artist) VALUES (?, ?, ?, ?);"))
     val id = UUIDs.timeBased
+    client.session.executeAsync(stmt.bind(id, title, album, artist)).toScalaFuture.map(rs => id)
+  }
+
+  def delete (id: UUID)(implicit ctxt: ExecutionContext) = {
+    val stmt = new BoundStatement(client.session.prepare("DELETE FROM simplex.songs WHERE id = ?;"))
+    client.session.executeAsync(stmt.bind(id)).toScalaFuture.map(rs => song(rs.one))
+  }
+
+  def update (id: UUID, title: String, album: String, artist: String)(implicit ctxt: ExecutionContext) = {
+    val stmt = new BoundStatement(client.session.prepare("UPDATE simplex.songs SET title = ?, album = ?, artist = ? WHERE id = ?;"))
     client.session.executeAsync(stmt.bind(id, title, album, artist)).toScalaFuture.map(rs => id)
   }
 }
@@ -79,4 +93,16 @@ object JsonFormats {
     (__ \ 'title).read[String] and
       (__ \ 'album).read[String] and
       (__ \ 'artist).read[String]) tupled
+}
+
+object SongForm {
+
+  val form = Form(
+    mapping(
+      "title" -> nonEmptyText,
+      "album" -> nonEmptyText,
+      "artist" -> nonEmptyText
+
+    )(SongFormData.apply)(SongFormData.unapply)
+  )
 }

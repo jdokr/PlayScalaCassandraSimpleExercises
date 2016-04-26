@@ -21,7 +21,7 @@ import scala.collection.JavaConversions._
   **/
 
 
-class SimpleClient @Inject() (node: String) {
+class SimpleClient @Inject() (node : String) {
 
   private val cluster = Cluster.builder().addContactPoint(node).build()
   log(cluster.getMetadata())
@@ -38,48 +38,10 @@ class SimpleClient @Inject() (node: String) {
 
   def createSchema(): Unit = {
     session.execute("CREATE KEYSPACE IF NOT EXISTS simplex WITH replication = {'class':'SimpleStrategy', 'replication_factor':3};")
-
+  }
     //Execute statements to create two new tables, songs and playlists. Add to the createSchema method:
-    session.execute(
-      """CREATE TABLE IF NOT EXISTS simplex.songs (
-        id uuid PRIMARY KEY,
-        title text,
-        album text,
-        artist text,
-        tags set<text>,
-        data blob
-        );""")
-    session.execute(
-      """CREATE TABLE IF NOT EXISTS simplex.playlists (
-        id uuid,
-        title text,
-        album text,
-        artist text,
-        song_id uuid,
-        PRIMARY KEY (id, title, album, artist)
-        );""")
-  }
 
-  def loadData() = {
-    session.execute(
-      """INSERT INTO simplex.songs (id, title, album, artist, tags)
-      VALUES (
-          756716f7-2e54-4715-9f00-91dcbea6cf50,
-          'La Petite Tonkinoise',
-          'Bye Bye Blackbird',
-          'Joséphine Baker',
-          {'jazz', '2013'})
-          ;""")
-    session.execute(
-      """INSERT INTO simplex.playlists (id, song_id, title, album, artist)
-      VALUES (
-          2cc9ccb7-6221-4ccb-8387-f22b6a1b354d,
-          756716f7-2e54-4715-9f00-91dcbea6cf50,
-          'La Petite Tonkinoise',
-          'Bye Bye Blackbird',
-          'Joséphine Baker'
-          );""")
-  }
+
 
   def querySchema() = {
     val results = session.execute("SELECT * FROM simplex.playlists WHERE id = 2cc9ccb7-6221-4ccb-8387-f22b6a1b354d;")
@@ -109,14 +71,4 @@ class SimpleClient @Inject() (node: String) {
     cluster.close
   }
 
-}
-
-object Cassandra extends App {
-  val client = new SimpleClient("127.0.0.1")
-  client.createSchema
-  client.loadData
-  client.querySchema
-  println("Count: " + client.countFrom("songs"))
-  // client.dropSchema
-  client.close
 }
