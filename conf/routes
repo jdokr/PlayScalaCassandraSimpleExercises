@@ -3,19 +3,21 @@
 # ~~~~
 
 # Home page
+GET     /                           @controllers.Application.home
 GET     /admin                      @controllers.Login.index
-GET     /                           @controllers.Application.index
 
 
 
-POST    /                           @controllers.Application.createSong
-POST    /delete/:id                 @controllers.Application.deleteSong(id : java.util.UUID)
-POST    /edit/                      @controllers.Application.updateSong
+# CRUD Operations
+GET     /songs/                      @controllers.Songs.index
+POST    /songs/                      @controllers.Songs.createSong
+POST    /songs/delete/:id            @controllers.Songs.deleteSong(id : java.util.UUID)
+POST    /songs/edit/                 @controllers.Songs.updateSong
 
 
 POST    /admin/add                  @controllers.Login.addUser()
 
-GET     /:id                        @controllers.Application.songById(id : String)
+GET     /:id                        @controllers.Songs.songById(id : String)
 
 GET     /admin/delete/:id           @controllers.Login.deleteUser(id : Long)
 

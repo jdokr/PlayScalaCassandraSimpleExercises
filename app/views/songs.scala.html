@@ -3,24 +3,24 @@
 
 @main("Welcome to my First app") {
 <!DOCTYPE html>
-<html>
+  <html>
 
     <div><!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary btn-md pull-right" tabindex="7" data-toggle="modal" data-target="#myModal">
-            Add Song
-        </button>
+      <button type="button" class="btn btn-primary btn-md pull-right" tabindex="7" data-toggle="modal" data-target="#myModal">
+        Add Song
+      </button>
     </div>
 
     @views.html.CRUD.listSongs(songs)
 
 
 
-    <!-- Crud and confirmation imports -->
+      <!-- Crud and confirmation imports -->
     @views.html.CRUD.deleteConfirmationModal()
     @views.html.CRUD.addSongModal()
     @views.html.CRUD.editSong()
 
 
-</html>
+  </html>
 }
 
