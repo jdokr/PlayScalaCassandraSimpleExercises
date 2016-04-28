@@ -2,9 +2,11 @@ package models
 
 import java.util.UUID
 
-import com.datastax.driver.core.{BoundStatement, Row}
+import com.datastax.driver.core.querybuilder.QueryBuilder
+import com.datastax.driver.core.Row
 import com.datastax.driver.core.utils.UUIDs
 import com.google.inject.Inject
+
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.ValidationError
@@ -17,6 +19,10 @@ import scala.concurrent.{ExecutionContext, Future}
 case class Song(id: UUID, title: String, album: String, artist: String)
 
 case class SongFormData(title: String, album: String, artist: String)
+
+case class EditSongFormData(id: String, title: String, album: String, artist: String)
+
+
 
 class SongsRepository @Inject() (client: SimpleClient) {
 
@@ -35,24 +41,38 @@ class SongsRepository @Inject() (client: SimpleClient) {
     Song(row.getUUID("id"), row.getString("title"), row.getString("album"), row.getString("artist"))
 
   def getById(id: UUID)(implicit ctxt: ExecutionContext): Future[Song] = {
-    val stmt = new BoundStatement(client.session.prepare("SELECT * FROM simplex.songs WHERE id = ?;"))
-    client.session.executeAsync(stmt.bind(id)).toScalaFuture.map(rs => song(rs.one))
+    val query = QueryBuilder.select().from("simplex", "songs").where(QueryBuilder.eq("id",id))
+
+    client.session.executeAsync(query).toScalaFuture.map(rs => song(rs.one))
   }
 
   def insert(title: String, album: String, artist: String)(implicit ctxt: ExecutionContext): Future[UUID] = {
-    val stmt = new BoundStatement(client.session.prepare("INSERT INTO simplex.songs (id, title, album, artist) VALUES (?, ?, ?, ?);"))
     val id = UUIDs.timeBased
-    client.session.executeAsync(stmt.bind(id, title, album, artist)).toScalaFuture.map(rs => id)
+    val statement = QueryBuilder.insertInto("simplex", "songs")
+      .value("id", id)
+      .value("title", title)
+      .value("album", album)
+      .value("artist",artist)
+    client.session.executeAsync(statement).toScalaFuture.map(rs => id)
+
   }
 
   def delete (id: UUID)(implicit ctxt: ExecutionContext) = {
-    val stmt = new BoundStatement(client.session.prepare("DELETE FROM simplex.songs WHERE id = ?;"))
-    client.session.executeAsync(stmt.bind(id)).toScalaFuture.map(rs => song(rs.one))
+    //val stmt = new BoundStatement(client.session.prepare("DELETE FROM simplex.songs WHERE id = ?;"))
+    val query = QueryBuilder.delete().from("simplex","songs").where(QueryBuilder.eq("id", id));
+    client.session.executeAsync(query)
   }
 
-  def update (id: UUID, title: String, album: String, artist: String)(implicit ctxt: ExecutionContext) = {
-    val stmt = new BoundStatement(client.session.prepare("UPDATE simplex.songs SET title = ?, album = ?, artist = ? WHERE id = ?;"))
-    client.session.executeAsync(stmt.bind(id, title, album, artist)).toScalaFuture.map(rs => id)
+  def update (Id: UUID, title: String, album: String, artist: String)(implicit ctxt: ExecutionContext) = {
+    val query = QueryBuilder.update("simplex", "songs")
+        .`with`(QueryBuilder.set("title", title))
+      .and(QueryBuilder.set("artist",artist))
+      .and(QueryBuilder.set("album",album))
+      .where(QueryBuilder.eq("id", Id))
+
+    print(Id, title, album, artist)
+    client.session.executeAsync(query)
+
   }
 }
 
@@ -90,6 +110,7 @@ object JsonFormats {
 
   implicit val songFormat: Format[Song] = Json.format[Song]
   implicit val songDataReads = (
+
     (__ \ 'title).read[String] and
       (__ \ 'album).read[String] and
       (__ \ 'artist).read[String]) tupled
@@ -104,5 +125,19 @@ object SongForm {
       "artist" -> nonEmptyText
 
     )(SongFormData.apply)(SongFormData.unapply)
+  )
+}
+
+
+object EditSongForm {
+
+  val form = Form(
+    mapping(
+      "id"    -> nonEmptyText,
+      "title" -> nonEmptyText,
+      "album" -> nonEmptyText,
+      "artist" -> nonEmptyText
+
+    )(EditSongFormData.apply)(EditSongFormData.unapply)
   )
 }

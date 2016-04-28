@@ -1,37 +1,81 @@
+
 <!DOCTYPE html>
 <html lang="en">
-  <div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+
+<div class="modal fade" id="edit-song" tabindex="-1" role="dialog" aria-labelledby="editLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-          <h4 class="modal-title custom_align" id="Heading">Edit Your Song</h4>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                <h4 class="modal-title custom_align" id="Heading">Edit Your Song</h4>
+            </div>
+
+            <form method="POST" action="@routes.Application.updateSong()" accept-charset="UTF-8">
+
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <input class="form-control form-id hidden" name="id" type="text" placeholder="title">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input class="form-control form-title" id="title" name="title" type="text" placeholder="title" value="Title">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="album">Album</label>
+                        <input class="form-control form_album" id="album" type="text" name="album" placeholder="album">
+                    </div>
+                    <div class="form-group">
+                        <label for="artist">Artist</label>
+                        <input name ="artist" class="form-control form_artist" id="artist" type="text" placeholder="artist">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit"  id="update"  class="btn btn-success btn-lg submit-update" ><span class="glyphicon glyphicon-ok-sign"></span> Update</button>
+                    </div>
+
+
+
+                </div>
+</form>
+
+
         </div>
-        <form role="form" action="@routes.Application.updateSong(user.id)" method="post" autocomplete="off">
-        <div class="modal-body">
-
-          <div class="form-group">
-            <input class="form-control " type="text" placeholder="title">
-          </div>
-          <div class="form-group">
-
-            <input class="form-control " type="text" placeholder="album">
-          </div>
-          <div class="form-group">
-
-            <input class="form-control " type="text" placeholder="artist">
-          </div>
-
-
-        </div>
-        <div class="modal-footer ">
-          <button type="button" class="btn btn-warning btn-lg" ><span class="glyphicon glyphicon-ok-sign"></span> Update</button>
-        </div>
-
-      </div>
-        <!-- /.modal-content -->
     </div>
-      <!-- /.modal-dialog -->
-  </div>
+
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready( function () {
+
+        $(".edit-button").on('click',function (e) {
+
+            var id = $(this).data("id");
+            var ti = $(this).data("title");
+            var al = $(this).data("album");
+            var ar = $(this).data("artist");
+
+
+            $(".form-id").val(id);
+            $(".form-title").val(ti);
+            $(".form_album").val(al);
+            $(".form_artist").val(ar);
+
+            var form = $(e.relatedTarget).closest('form');
+            $(this).find('.modal-footer #update').data('form', form);
+        });
+
+        <!-- Form confirm (yes/ok) handler, submits form -->
+        $('#edit-song').find('.modal-footer #update').on('click', function(){
+            $(this).data('form').submit();
+        });
+    });
+
+</script>
 
 </html>

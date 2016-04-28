@@ -10,11 +10,12 @@ GET     /                           @controllers.Application.index
 
 POST    /                           @controllers.Application.createSong
 POST    /delete/:id                 @controllers.Application.deleteSong(id : java.util.UUID)
-POST    /edit/                      @controllers.Application.updateSong(id : java.util.UUID)
+POST    /edit/                      @controllers.Application.updateSong
+
 
 POST    /admin/add                  @controllers.Login.addUser()
 
-GET     /:id                        @controllers.Application.songById(id)
+GET     /:id                        @controllers.Application.songById(id : String)
 
 GET     /admin/delete/:id           @controllers.Login.deleteUser(id : Long)
 

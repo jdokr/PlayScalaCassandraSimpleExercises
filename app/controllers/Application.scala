@@ -34,8 +34,8 @@ package controllers
 import java.util.UUID
 
 import com.google.inject.Inject
-import models.{Song, SongForm, SongsRepository}
-import play.api.libs.json.{Json}
+import models.{EditSongForm, Song, SongForm, SongsRepository}
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, _}
 
 
@@ -72,11 +72,12 @@ class Application @Inject() (songsRepo: SongsRepository) extends Controller {
 
   }
 
-  def updateSong (Id: UUID) = Action { implicit request =>
-    SongForm.form.bindFromRequest.fold(
+  def updateSong () = Action { implicit request =>
+    EditSongForm.form.bindFromRequest.fold(
     errorForm => Ok(views.html.index(Seq.empty[Song])),
     data => {
-      val newSong = songsRepo.update(Id, data.title,data.album, data.artist)
+      val id = UUID.fromString(data.id)
+      val newSong = songsRepo.update(id,data.title,data.album, data.artist)
       Redirect(routes.Application.index())
 
     })
